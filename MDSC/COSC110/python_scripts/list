@@ -1,0 +1,6 @@
+total 20
+-rw-rw-r-- 1 bmurarot bmurarot  596 Feb 28 08:38 cube.py
+-rw-rw-r-- 1 bmurarot bmurarot  489 Feb 28 15:15 mypolygon.py
+drwxrwxr-x 2 bmurarot bmurarot 4096 Feb 28 08:54 __pycache__
+-rw-rw-r-- 1 bmurarot bmurarot  507 Feb 28 08:29 test01.py
+-rw-rw-r-- 1 bmurarot bmurarot  271 Mar  3 11:35 tutorial_2.py
