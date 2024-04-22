@@ -1,0 +1,11 @@
+
+def convert_to_tuple():
+    stored = []
+    with open('orders.txt', 'r') as file:
+        for line in file:
+            ordered_line = (line.strip())
+            stored.append(ordered_line)
+        
+    print(stored)
+
+convert_to_tuple()     
