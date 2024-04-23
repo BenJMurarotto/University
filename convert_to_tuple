@@ -1,11 +1,36 @@
+bun_options = ['milk', 'gluten free']
+sauce_options = ['tomato', 'barbecue', 'none']
+patty_options = range(4)
+cheese_options = range(4)
+other_options = ['yes', 'no', 'y', 'n']
 
-def convert_to_tuple():
-    stored = []
-    with open('orders.txt', 'r') as file:
-        for line in file:
-            ordered_line = (line.strip())
-            stored.append(ordered_line)
-        
-    print(stored)
+def convert_to_tuple(order_path):
+    stored = {}
+    try:
+        with open(order_path, 'r') as file:
+            for line in file:
+                tuple_items = []
+                ordered_line = line.strip().split(',')
+                if (ordered_line[0] in bun_options and
+                    ordered_line[1] in sauce_options and
+                    int(ordered_line[2]) in patty_options and
+                    int(ordered_line[3]) in cheese_options and
+                    ordered_line[4] in other_options and
+                    ordered_line[5] in other_options and
+                    ordered_line[6] in other_options):
+                        tuple_items = [True if item.strip() == 'yes' else False if item.strip() == 'no' else item.strip() for item in ordered_line]
+                        final_tuple = tuple(tuple_items)
+                        if final_tuple in stored:
+                            stored[final_tuple] += 1
+                        else:
+                            stored[final_tuple] = 1
+                else:
+                     print('Error reading data. Please ensure each line of orders.txt starts with the bun type (milk or gluten free), followed by a comma, then the sauce type (tomato, barbecue or none), followed by a comma, then the number of patties (0-3), followed by a comma, then the number of slices of cheese (0-3), followed by a comma, then whether tomato is included (yes or no), followed by a comma, then whether lettuce is included (yes or no), followed by a comma, then whether onion is included (yes or no)')
+    except FileNotFoundError:
+        print('File not found, please provide a valid file path to orders.txt.')
+    return stored
 
-convert_to_tuple()     
+order_counts = convert_to_tuple('orders.txt')     
+print(order_counts)
+
+
