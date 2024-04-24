@@ -3,9 +3,10 @@ sauce_options = ['tomato', 'barbecue', 'none']
 patty_options = range(4)
 cheese_options = range(4)
 other_options = ['yes', 'no', 'y', 'n']
+stored = {}
+base_price = 5
 
 def convert_to_tuple(order_path):
-    stored = {}
     try:
         with open(order_path, 'r') as file:
             for line in file:
@@ -30,7 +31,42 @@ def convert_to_tuple(order_path):
         print('File not found, please provide a valid file path to orders.txt.')
     return stored
 
-order_counts = convert_to_tuple('orders.txt')     
-print(order_counts)
+
+def get_price(stored_value, base_price, stored):
+    price = base_price
+    if stored_value in stored:
+        order_tuple = stored_value
+        for item in order_tuple:
+            if item == 'gluten free':
+                price += 1
+            elif item == True:
+                price += 1
+            elif int(item).is_integer() == True and order_tuple.index(item) == 2:
+                    price += int(item) * 3
+            elif int(item).is_integer() == True and order_tuple.index(item) == 3:
+                    price += int(item)
+    else:
+        print("Key not found in stored dictionary")
+    return price
+
+
+valid_input = False
+while not valid_input:
+    get_top_burger = int(input('How many of the top burgers would you like to output?: '))
+    if get_top_burger > 0:
+         valid_input = True
+    else:
+         print('Input error. Please provide a valid integer!')
+
+order_counts = convert_to_tuple('orders.txt') 
+
+for x in range(get_top_burger):
+     max_key = max(stored, key=stored.get)
+     print(f"Order: {max_key} Count: {stored[max_key]} Price: ${get_price(max_key, base_price, stored)}")
+     stored.pop(max_key)
+
+
+
+
 
 
