@@ -89,8 +89,6 @@ for i in range(1, order_number):
     if current_order['Bun'] == 'gluten free':
         total_price += 1
     if current_order['Number of patties'] > 1:
-        total_price += (current_order['Number of patties'] - 1) * 3
-    if current_order['Number of cheese slices'] > 1:
         total_price += (current_order['Number of cheese slices'] - 1)
     if current_order['Tomato'].lower() == 'y' or current_order['Tomato'].lower() == 'yes':
         total_price += 1
