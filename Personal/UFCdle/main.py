@@ -30,5 +30,3 @@ def get_link():
     
 
     
-
-

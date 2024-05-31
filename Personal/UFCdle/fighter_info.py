@@ -1,54 +1,63 @@
-from main import get_link
 import requests
 from bs4 import BeautifulSoup
 import csv
 
-fighter_data = {}
+fighter_data = []
 style_options = ['Jiu-Jitsu', 'Wrestler', 'Kickboxer', 'Sambo', 'MMA', 'Boxing', 'Freestyle', 'Grappler']
-csv_file = 'fighter_data.csv'
+csv_file = 'Personal/UFCdle/fighter_data.csv'
 
-def store_fighter_data():
-    response = requests.get(f'https://www.ufc.com/{get_link()}')
+def store_fighter_data(textfile):
+    response = requests.get(f'https://www.ufc.com{textfile}')
     if response.status_code == 200:
-        # Parse the UFC fighter content
+        fname = {}
+
         soup = BeautifulSoup(response.text, 'html.parser')
         
         # Scrape Division
         scrape_division = soup.find_all("div", class_="hero-profile__division")
-        hero_profile = scrape_division[0].text.split("\n")
-        division = hero_profile[1].split(' ')
-        for x, item in enumerate(division):
-                if item == 'Division':
-                        del division[x]         
-        dprocessing = ' '.join(map(str, division))    
-        fighter_data['Division'] = dprocessing.strip("'[],") 
+        if scrape_division:
+            scrape_division = soup.find("p", class_="hero-profile__division-title")
+            fdivision = scrape_division.text.strip(' Division')
+            fname['Division'] = fdivision
+
 
         # Scrape Fighting Style
-        scrape_style = soup.find_all("div", class_="c-bio__text")
-        for style in scrape_style:
-            if style.text.strip() in style_options:
-                fighter_data['Fighting Style'] = style.text.strip()
+        scrape_style = soup.find_all("div", class_="c-bio__field c-bio__field--border-bottom-small-screens")
+        fighting_style = 'MMA'  # Default value if not found
+        
+        for elem in scrape_style:
+            label = elem.find("div", class_="c-bio__label")
+            value = elem.find("div", class_="c-bio__text")
+            if label and "Fighting style" in label.text:
+                fighting_style = value.text.strip()
                 break
-        else:
-            fighter_data['Fighting Style'] = 'MMA'
-        print("Fighting Style:", fighter_data['Fighting Style'])  # Debugging statement
+        
+        fname['Fighting Style'] = fighting_style
 
         # Scrape Country
-        if len(scrape_style) > 1:
-            home_town = scrape_style[1].text.strip()
-            if ',' in home_town:
-                fighter_data['Country'] = home_town.split(', ')[-1]
-            else:
-                fighter_data['Country'] = home_town
+        scrape_country = soup.find("div", class_= "c-bio__field c-bio__field--border-bottom-small-screens")
+        nested_scrape = scrape_country.find("div", class_= "c-bio__text")
+        if ',' in nested_scrape.text:
+            fname['Country'] = nested_scrape.text.split(', ')[-1]
         else:
-            fighter_data['Country'] = 'Unknown'
-        print("Country:", fighter_data['Country'])  # Debugging statement
+            fname['Country'] = nested_scrape.text
 
-def write_to_csv(fighter_dict):
+        # Scrape Rank
+        scrape_rank = soup.find("div", class_= "c-bio__field c-bio__field--border-bottom-small-screens")
+
+        fighter_data.append(fname)
+
+def write_to_csv(fighter_list):
     with open(csv_file, mode='w', newline='') as file:
         writer = csv.DictWriter(file, fieldnames=['Division', 'Fighting Style', 'Country'])
         writer.writeheader()
-        writer.writerow(fighter_dict)  # Write a single row
+        for fighter in fighter_list:
+            writer.writerow(fighter)
 
-store_fighter_data()
+# Read and process each line from the text file
+with open('Personal/UFCdle/fighter.txt') as f:
+    for line in f:
+        store_fighter_data(line.strip())
+
+# Write all collected data to CSV
 write_to_csv(fighter_data)
