@@ -24,9 +24,12 @@ def get_link():
 
 
     count_fighters = len(fighter_list)
-    select_fighter = random.randint(0, count_fighters)
-    print(fighter_list[select_fighter])
-    return((fighter_list[select_fighter]))
+    ###select_fighter = random.randint(0, count_fighters) - this segment of code was to pull a random fighter from fighter_list
+   ### print(fighter_list[select_fighter])
+   ####  return((fighter_list[select_fighter]))
+    return fighter_list
     
 
     
+
+

@@ -1,0 +1,13 @@
+<form method="post" action="/guess">
+    <input type="text" name="guess" required>
+    <button type="submit">Submit Guess</button>
+</form>
+
+{% if guesses %}
+    <h2>Your Guesses:</h2>
+    <ul>
+        {% for guess in guesses %}
+            <li>{{ guess }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
