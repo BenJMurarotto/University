@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import csv
 from datetime import datetime
 fighter_data = []
-csv_file = 'Personal/UFCdle/fighter_data.csv'
+csv_file = 'fighter_data.csv'
 
 # Function to convert the date format
 def convert_date(date_str):
@@ -24,20 +24,29 @@ def store_fighter_data(textfile):
 
         #Get Name
         scrape_name = soup.find("h1", class_="hero-profile__name")
-        fname['Name'] = scrape_name.text
+        namesplit = scrape_name.text.split()
+        if len(namesplit) > 0:
+            fname['fname'] = namesplit[0]
+
+        if len(namesplit) == 1:
+            fname['lname'] = ''
+        elif len(namesplit) == 2:
+            fname['lname'] = namesplit[1]
+        elif len(namesplit) > 2:
+            fname['lname'] = ' '.join(namesplit[1:])
 
         if soup.find("p", class_="hero-profile__nickname"):
             scrape_nickname = soup.find("p", class_="hero-profile__nickname")
-            fname['Nickname'] = scrape_nickname.text.strip('"')
+            fname['nickname'] = scrape_nickname.text.strip('"')
         else:
-            fname['Nickname'] = None
+            fname['nickname'] = None
         
         # Scrape Division
         scrape_division = soup.find_all("div", class_="hero-profile__division")
         if scrape_division:
             scrape_division = soup.find("p", class_="hero-profile__division-title")
             fdivision = scrape_division.text.strip(' Division')
-            fname['Division'] = fdivision
+            fname['division'] = fdivision
 
 
         # Scrape Fighting Style
@@ -51,7 +60,7 @@ def store_fighter_data(textfile):
                 fighting_style = value.text.strip()
                 break
         
-        fname['Fighting Style'] = fighting_style
+        fname['style'] = fighting_style
 
         # Scrape Country
         scrape_country = soup.find_all("div", class_= "c-bio__field c-bio__field--border-bottom-small-screens")
@@ -64,9 +73,9 @@ def store_fighter_data(textfile):
 
     
         if ',' in hometown:
-            fname['Country'] = hometown.strip('"').split(', ')[-1]
+            fname['country'] = hometown.strip('"').split(', ')[-1]
         else:
-            fname['Country'] = hometown.split('\n')[-1]
+            fname['country'] = hometown.split('\n')[-1]
 
 
         # Scrape Rank
@@ -77,9 +86,9 @@ def store_fighter_data(textfile):
                 rank += s
 
         if rank != '':
-            fname['Rank'] = rank
+            fname['rank'] = rank
         else:
-            fname['Rank'] = 'C'
+            fname['rank'] = 'C'
 
         #Scrape debut
         scrape_debut = soup.find_all("div", class_="c-bio__field")
@@ -90,21 +99,22 @@ def store_fighter_data(textfile):
             else:
                 debut = 'Unknown'
 
-        fname['Debut'] = convert_date(debut.strip().split('\n')[-1])
+        fname['debut'] = convert_date(debut.strip().split('\n')[-1])
         
         fighter_data.append(fname)
 
 def write_to_csv(fighter_list):
     with open(csv_file, mode='w', newline='') as file:
-        writer = csv.DictWriter(file, fieldnames=['Name', 'Nickname', 'Division', 'Rank', 'Fighting Style', 'Country', 'Debut'])
+        writer = csv.DictWriter(file, fieldnames=['fname', 'lname', 'nickname', 'division', 'rank', 'style', 'country', 'debut'])
         writer.writeheader()
         for fighter in fighter_list:
             writer.writerow(fighter)
 
 # Read and process each line from the text file
-with open('Personal/UFCdle/fighter.txt') as f:
-    for line in f:
-        store_fighter_data(line.strip())
+def make_csv():
+    with open('fighter.txt') as f:
+        for line in f:
+            store_fighter_data(line.strip())
 
-# Write all collected data to CSV
-write_to_csv(fighter_data)
+    # Write all collected data to CSV
+    write_to_csv(fighter_data)

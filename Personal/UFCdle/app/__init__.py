@@ -1,10 +1,13 @@
 from flask import Flask
-from flask import Flask
-from config import Config
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
+from .routes import bp as routes_bp
+from .db import close_db
 
-app = Flask(__name__)
-app.config.from_object(Config)
+def create_app():
+    app = Flask(__name__)
+    app.register_blueprint(routes_bp)
 
-from app import routes
+    @app.teardown_appcontext
+    def teardown_db(exception):
+        close_db(exception)
+
+    return app

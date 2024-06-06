@@ -1,42 +1,15 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UFC Fighters</title>
+    <title>UFCdle</title>
 </head>
 <body>
-    <h1>UFC Fighters</h1>
-    <table>
-        <tr>
-            <th>Fighter Name</th>
-            <th>Nickname</th>
-            <th>Rank</th>
-            <th>Division</th>
-            <th>Style</th>
-            <th>Debut</th>
-        </tr>
-        {% for fighter in fighters %}
-        <tr>
-            <td>{{ fighter.fightername }}</td>
-            <td>{{ fighter.nickname }}</td>
-            <td>{{ fighter.rank }}</td>
-            <td>{{ fighter.division }}</td>
-            <td>{{ fighter.style }}</td>
-            <td>{{ fighter.debut }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-
-    <h2>Add a New Fighter</h2>
-    <form method="post" action="{{ url_for('add_fighter') }}">
-        <p><input type="text" name="fightername" placeholder="Fighter Name"></p>
-        <p><input type="text" name="nickname" placeholder="Nickname"></p>
-        <p><input type="number" name="rank" placeholder="Rank"></p>
-        <p><input type="text" name="division" placeholder="Division"></p>
-        <p><input type="text" name="style" placeholder="Style"></p>
-        <p><input type="date" name="debut" placeholder="Debut"></p>
-        <p><input type="submit" value="Add Fighter"></p>
+    <h1>UFCdle</h1>
+    <form method="post" action="{{ url_for('main.search') }}">
+        <input type="text" name="fightername" placeholder="Enter fighter's name" required>
+        <button type="submit">Search</button>
     </form>
 </body>
 </html>
