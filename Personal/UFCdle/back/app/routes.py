@@ -1,10 +1,25 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, session, render_template
 from .db import get_db
+from random import randint
 
 bp = Blueprint('main', __name__)
 
 def row_to_dict(row):
     return {k: row[k] for k in row.keys()}
+
+@bp.route('/')
+def index():
+    db = get_db()
+    secret_id = randint(1, 173)  # Adjust based on your actual data range
+    cur = db.execute("SELECT * FROM ufc_fighters WHERE id = ?", (secret_id,))
+    secret_fighter = cur.fetchone()
+    if secret_fighter:
+        session['secret_fighter'] = row_to_dict(secret_fighter)
+        session.modified = True  # Ensure the session is saved
+        print(f"Secret fighter set: {session['secret_fighter']}")  # Debugging statement
+    else:
+        print("No secret fighter found")
+    return render_template('index.html')
 
 @bp.route('/ajax_search', methods=['GET'])
 def ajax_search():
@@ -42,4 +57,17 @@ def fighter_details():
             return jsonify({'error': 'Fighter not found'}), 404
     except Exception as e:
         print(f"Error during fighter_details: {str(e)}")  # Debugging statement
+        return jsonify({'error': str(e)}), 500
+
+@bp.route('/get_secret_fighter', methods=['GET'])
+def get_secret_fighter():
+    try:
+        secret_fighter = session.get('secret_fighter')
+        print(f"Session Data: {dict(session)}")  # Debugging statement to see session data
+        if secret_fighter:
+            return jsonify(secret_fighter)
+        else:
+            return jsonify({'error': 'Secret fighter not found in session'}), 500
+    except Exception as e:
+        print(f"Error retrieving secret fighter: {str(e)}")  # Debugging statement
         return jsonify({'error': str(e)}), 500

@@ -37,6 +37,12 @@
   padding: 10px 0;
 }
 
-.header {
-  text-align: center;
+.match {
+  color: green;
+}
+
+.reveal {
+  margin-top: 20px;
+  padding: 10px;
+  border: 2px solid red;
 }
