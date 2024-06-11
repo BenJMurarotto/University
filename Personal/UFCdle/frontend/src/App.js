@@ -1,146 +1,107 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import './App.css';
-import { checkGuess, maxGuesses } from './utils/gameLogic';
+import './App.css';  // Import the CSS file
 
-function App() {
-  const [fighters, setFighters] = useState([]);
-  const [search, setSearch] = useState('');
-  const [result, setResult] = useState(null);
-  const [guessedFighters, setGuessedFighters] = useState([]);
-  const [currentGuess, setCurrentGuess] = useState(null);
+const App = () => {
+    const [fighterName, setFighterName] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+    const [guesses, setGuesses] = useState([]);
+    const [error, setError] = useState('');
 
-  const handleSearchChange = (event) => {
-    const fightername = event.target.value;
-    setSearch(fightername);
-    if (fightername.length >= 2) {
-      axios.get(`http://localhost:5000/ajax_search?fightername=${fightername}`)
-        .then(response => {
-          setFighters(response.data);
-        })
-        .catch(error => {
-          console.error('There was an error fetching the fighters!', error);
-        });
-    } else {
-      setFighters([]);
-    }
-  };
-
-  const selectFighter = (fullName) => {
-    setSearch(fullName);
-    setFighters([]);
-    submitGuess(fullName);
-  };
-
-  const submitGuess = (fightername) => {
-    console.log('Submitting guess for:', fightername);  // Debugging statement
-    if (guessedFighters.some(f => f.fightername === fightername)) {
-      alert("You have already guessed this fighter!");
-      return;
-    }
-
-    if (guessedFighters.length >= maxGuesses) {
-      alert("No more guesses allowed!");
-      return;
-    }
-
-    axios.post('http://localhost:5000/guess', { fightername }, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-      .then(response => {
-        console.log('Response received:', response.data);  // Debugging statement
-        const data = response.data;
-        if (data.error) {
-          alert(data.error);
-        } else {
-          setGuessedFighters(prevGuessedFighters => [
-            ...prevGuessedFighters, 
-            { fightername, data: data.fighter }
-          ]);
-          setCurrentGuess(data.fighter);
-          setResult(data);
-
-          if (guessedFighters.length + 1 === maxGuesses) {
-            alert(`You've used all your guesses! The secret fighter was: ${data.secret_fighter.fname} ${data.secret_fighter.lname}`);
-          }
+    const searchFighters = async (name) => {
+        try {
+            const response = await axios.get(`http://localhost:5000/ajax_search`, {
+                params: { fightername: name },
+                withCredentials: true
+            });
+            setSearchResults(response.data);
+        } catch (error) {
+            console.error('Error fetching fighters:', error);
         }
-      })
-      .catch(error => {
-        console.error('There was an error processing the guess!', error);
-      });
-  };
+    };
 
-  return (
-    <div className="App">
-      <h1>UFCdle</h1>
-      <form id="guess-form" onSubmit={(e) => { e.preventDefault(); submitGuess(search); }}>
-        <input
-          type="text"
-          name="fightername"
-          id="fightername"
-          value={search}
-          onChange={handleSearchChange}
-          placeholder="Enter fighter's name"
-        />
-        <button type="submit">Guess</button>
-      </form>
-      <div id="search-results">
-        {fighters.map((fighter, index) => (
-          <div key={index} className="guess-line">
-            <p onClick={() => selectFighter(`${fighter.fname} ${fighter.lname}`)}>
-              {fighter.fname} {fighter.lname}
-            </p>
-          </div>
-        ))}
-      </div>
-      <div id="guess-results">
-        {guessedFighters.map((guess, index) => (
-          <div key={index}>
-            <h3>Guess {index + 1}:</h3>
-            <p>Name: {guess.data.fname} {guess.data.lname}</p>
-            <p>Nickname: {guess.data.nickname}</p>
-            <p>Rank: {guess.data.rank}</p>
-            <p>Division: {guess.data.division}</p>
-            <p>Style: {guess.data.style}</p>
-            <p>Country: {guess.data.country}</p>
-            <p>Debut: {guess.data.debut}</p>
-            <hr />
-          </div>
-        ))}
-        {result && (
-          <div>
-            <h3>Your Guess:</h3>
-            <div>
-              {checkGuess(result.fighter, result.secret_fighter).map(({ attr, isMatch }) => (
-                <span key={attr} className={isMatch ? 'match' : ''}>
-                  {result.fighter[attr]} {isMatch && <strong>{result.fighter[attr]}</strong>} | 
-                </span>
-              ))}
+    const getFighterDetails = async (name) => {
+        try {
+            const response = await axios.get(`http://localhost:5000/fighter_details`, {
+                params: { fightername: name },
+                withCredentials: true
+            });
+            if (response.data.error) {
+                setError(response.data.error);
+            } else {
+                setError('');
+                setGuesses(prevGuesses => {
+                    if (prevGuesses.length < 6) {
+                        return [...prevGuesses, response.data];
+                    }
+                    return prevGuesses;
+                });
+            }
+        } catch (error) {
+            console.error('Error fetching fighter:', error);
+            setError('Error fetching fighter details');
+        }
+    };
+
+    const handleSearchChange = (event) => {
+        const name = event.target.value;
+        setFighterName(name);
+        if (name.length >= 2) {
+            searchFighters(name);
+        } else {
+            setSearchResults([]);
+        }
+    };
+
+    const handleSearchClick = (name) => {
+        setFighterName(name);
+        setSearchResults([]);
+        getFighterDetails(name);
+    };
+
+    const handleGuess = () => {
+        if (guesses.length < 6) {
+            getFighterDetails(fighterName);
+        } else {
+            setError('Maximum of 6 guesses reached');
+        }
+    };
+
+    return (
+        <div className="container">
+            <div className="search-container">
+                <h1 className='header'> UFCdle</h1>
+                <input
+                    type="text"
+                    value={fighterName}
+                    onChange={handleSearchChange}
+                    placeholder="Enter fighter's name"
+                />
+                <button className='header' onClick={handleGuess}>Guess</button>
+                {error && <p>{error}</p>}
+                <div className="search-results">
+                    {searchResults.map((fighter, index) => (
+                        <p key={index} onClick={() => handleSearchClick(`${fighter.fname} ${fighter.lname}`)}>
+                            {fighter.fname} {fighter.lname}
+                        </p>
+                    ))}
+                </div>
             </div>
-            {guessedFighters.length === maxGuesses && (
-              <div>
-                <p>The secret fighter was: {result.secret_fighter.fname} {result.secret_fighter.lname}</p>
-              </div>
-            )}
-          </div>
-        )}
-        {currentGuess && (
-          <div>
-            <h3>Current Guessed Fighter:</h3>
-            <p>Name: {currentGuess.fname} {currentGuess.lname}</p>
-            <p>Nickname: {currentGuess.nickname}</p>
-            <p>Rank: {currentGuess.rank}</p>
-            <p>Division: {currentGuess.division}</p>
-            <p>Style: {currentGuess.style}</p>
-            <p>Country: {currentGuess.country}</p>
-            <p>Debut: {currentGuess.debut}</p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
+            <div className="guesses-container">
+                {guesses.map((fighter, index) => (
+                    <div key={index} className="guess">
+                        <p><strong> Guess {index + 1} </strong></p>
+                        <p><strong>{fighter.fname} {fighter.lname}</strong></p>
+                        <p>Rank: {fighter.rank}</p>
+                        <p>Division: {fighter.division}</p>
+                        <p>Style: {fighter.style}</p>
+                        <p>Country: {fighter.country}</p>
+                        <p>Debut: {fighter.debut}</p>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
 
 export default App;

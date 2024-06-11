@@ -1,9 +1,10 @@
 import sqlite3
-from flask import g
+from flask import g, current_app
 
 def get_db():
     if 'db' not in g:
-        g.db = sqlite3.connect('/Users/benmurarotto/Desktop/UniNotes/University/Personal/UFCdle/back/app/misc/ufcdle.db')
+        print(f"Connecting to database at {current_app.config['DATABASE']}")  # Debugging statement
+        g.db = sqlite3.connect(current_app.config['DATABASE'])
         g.db.row_factory = sqlite3.Row
     return g.db
 
