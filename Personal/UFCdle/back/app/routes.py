@@ -19,16 +19,25 @@ def index():
         print(f"Secret fighter set: {session['secret_fighter']}")  # Debugging statement
     else:
         print("No secret fighter found")
+    print(f"Session after setting secret fighter: {dict(session)}")  # Debugging statement
     return render_template('index.html')
 
 @bp.route('/ajax_search', methods=['GET'])
 def ajax_search():
     try:
         fighter_name = request.args.get('fightername', '')
-        db = get_db()
         print(f"Searching for fighter name: {fighter_name}")  # Debugging statement
+        
+        # Get database connection
+        db = get_db()
+        if db is None:
+            raise Exception("Database connection not established")
+        
+        # Execute query
         cur = db.execute('SELECT fname, lname FROM ufc_fighters WHERE fname LIKE ? OR lname LIKE ?', ('%' + fighter_name + '%', '%' + fighter_name + '%'))
         fighters = cur.fetchall()
+        
+        # Process results
         fighters_list = [{'fname': fighter['fname'], 'lname': fighter['lname']} for fighter in fighters]
         return jsonify(fighters_list)
     except Exception as e:

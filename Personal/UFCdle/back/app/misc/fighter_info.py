@@ -88,7 +88,15 @@ def store_fighter_data(textfile):
         if rank != '':
             fname['rank'] = rank
         else:
-            fname['rank'] = 'C'
+                if len(fighter_data) <= 11:
+                    fname['rank'] = 'C'
+                else:
+                    # Convert the last rank to an integer, increment it, and convert it back to a string
+                    last_rank = int(fighter_data[-1]['rank'])
+                    if last_rank == 15:
+                            fname['rank'] = '1'
+                    else:    
+                            fname['rank'] = str(last_rank + 1)
 
         #Scrape debut
         scrape_debut = soup.find_all("div", class_="c-bio__field")
@@ -118,3 +126,5 @@ def make_csv():
 
     # Write all collected data to CSV
     write_to_csv(fighter_data)
+
+make_csv()
