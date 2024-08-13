@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>UFCdle</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div style="text-align:center">
+        <h1>UFCdle</h1>
+        <input type="text" id="search" placeholder="Search for a name...">
+        <div id="results"></div>
+    </div>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#search').on('input', function() {
+                var query = $(this).val();
+
+                // Check if the length of the query is 3 characters or more
+                if (query.length >= 3) {
+                    $.ajax({
+                        url: '/search',
+                        method: 'GET',
+                        data: { query: query },
+                        success: function(data) {
+                            $('#results').empty();
+                            if (data.length > 0) {
+                                data.forEach(function(item) {
+                                    $('#results').append('<div>' + item[0] + ' ' + item[1] + '</div>');
+                                });
+                            } else {
+                                $('#results').append('<div>No results found</div>');
+                            }
+                        }
+                    });
+                } else {
+                    // Clear the results if the input is less than 3 characters
+                    $('#results').empty();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
