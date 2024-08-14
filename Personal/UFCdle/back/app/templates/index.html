@@ -8,36 +8,49 @@
 <body>
     <div style="text-align:center">
         <h1>UFCdle</h1>
-        <input type="text" id="search" placeholder="Search for a name...">
+        <input type="text" id="search" placeholder="Search for a fighter..." autocomplete="off">
+        <button id="guess-btn">Guess</button>
         <div id="results"></div>
+        <div id="guessed-fighters"></div>
+        <div id="message"></div>
     </div>
     <script type="text/javascript">
         $(document).ready(function() {
-            $('#search').on('input', function() {
-                var query = $(this).val();
-
-                // Check if the length of the query is 3 characters or more
-                if (query.length >= 3) {
-                    $.ajax({
-                        url: '/search',
-                        method: 'GET',
-                        data: { query: query },
-                        success: function(data) {
-                            $('#results').empty();
-                            if (data.length > 0) {
-                                data.forEach(function(item) {
-                                    $('#results').append('<div>' + item[0] + ' ' + item[1] + '</div>');
-                                });
+            $('#guess-btn').on('click', function() {
+                var query = $('#search').val();
+                $.ajax({
+                    url: '/search',
+                    method: 'GET',
+                    data: { query: query },
+                    success: function(response) {
+                        console.log(response);  // Log the response to check the returned data
+                        
+                        $('#message').empty();
+                        
+                        if (Array.isArray(response)) {
+                            if (response.length > 0) {
+                                // Display the first matching fighter
+                                displayGuessedFighter(response[0]);
+                                $('#message').html('<p>Guess submitted.</p>');
                             } else {
-                                $('#results').append('<div>No results found</div>');
+                                $('#message').html('<p>No matching fighter found.</p>');
                             }
+                        } else if (response.status === 'error') {
+                            $('#message').html('<p>' + response.message + '</p>');
+                        } else {
+                            $('#message').html('<p>Unexpected response format.</p>');
                         }
-                    });
-                } else {
-                    // Clear the results if the input is less than 3 characters
-                    $('#results').empty();
-                }
+                        
+                        $('#search').val('');  // Clear the input field
+                    }
+                });
             });
+
+            function displayGuessedFighter(fighter) {
+                if (fighter && $('#guessed-fighters').children().length < 6) {
+                    $('#guessed-fighters').append('<div>' + fighter.fname + ' ' + fighter.lname + '</div>');
+                }
+            }
         });
     </script>
 </body>
