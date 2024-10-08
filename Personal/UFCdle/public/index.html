@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>UFCdle</title>
+    </head>
+    <body>
+        <ul id="data-list"></ul>
+        <script>
+            fetch('/data')
+                .then(Response => Response.json())
+                .then(data => {
+                    const fighterList = document.getElementById('data-list');
+                    data.forEach(fighter => {
+                        const listfighter = document.createElement('li');
+                        listfighter.textContent = `Name: ${fighter.fname} ${fighter.lname}, Division: ${fighter.division}`
+                        fighterList.appendChild(listfighter)
+                        
+                    });
+                })
+        </script>
+    </body>
+</html>
