@@ -1,0 +1,78 @@
+/* Center grid container and its content */
+.grid-container {
+    display: grid;
+    place-items: center;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    height: 100vh;
+    margin: 0;
+}
+
+/* Grid item containing heading and search input */
+.grid-item {
+    background-color: lightblue;
+    padding: 20px;
+    border: 1px solid #ccc;
+    text-align: center;
+    position: relative; /* Make it relative to position the dropdown correctly */
+}
+
+/* Large heading */
+.large-heading {
+    font-size: 36px;
+    margin-bottom: 20px;
+}
+
+/* Search input styling */
+#search-input {
+    width: 300px;
+    padding: 10px;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+/* Dropdown container styling */
+.dropdown {
+    position: absolute; /* Position relative to the .grid-item */
+    top: 150; /* Adjust this value to match the height of the search input */
+    left: 0;
+    width: 100%; /* Ensures the dropdown matches the search input's width */
+    border: 1px solid #ccc;
+    background-color: white;
+    max-height: 200px;
+    overflow-y: auto;
+    display: none; /* Initially hidden */
+    z-index: 1000;
+}
+
+/* Style for each dropdown item */
+.dropdown-item {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Hover effect for dropdown items */
+.dropdown-item:hover {
+    background-color: #f0f0f0;
+}
+
+/* Table styling */
+table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+td {
+    background-color: #ffffff;
+}

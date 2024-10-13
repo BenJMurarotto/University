@@ -7,6 +7,7 @@ cur = con.cursor()
 cur.execute('''DROP TABLE IF EXISTS fighters; ''') ### Delete the current table to avoid the code adding extra rows to the existing db
 cur.execute(
 '''CREATE TABLE fighters(
+id PRIMARY KEY,
 fname,   
 lname,
 nickname,

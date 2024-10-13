@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 from datetime import datetime
+
 fighter_data = []
 csv_file = 'fighter_data.csv'
 
@@ -15,10 +16,18 @@ def convert_date(date_str):
     except ValueError:
         return None
 
+# Add an auto-incrementing id to each fighter
+id_counter = 1
+
 def store_fighter_data(textfile):
+    global id_counter
     response = requests.get(f'https://www.ufc.com{textfile}')
     if response.status_code == 200:
         fname = {}
+        
+        # Assign the current id and increment it
+        fname['id'] = id_counter
+        id_counter += 1
 
         soup = BeautifulSoup(response.text, 'html.parser')
 
@@ -71,12 +80,10 @@ def store_fighter_data(textfile):
             else:
                 hometown = 'Unknown'
 
-    
         if ',' in hometown:
             fname['country'] = hometown.strip('"').split(', ')[-1]
         else:
             fname['country'] = hometown.split('\n')[-1]
-
 
         # Scrape Rank
         scrape_rank = soup.find("div", class_= "hero-profile__tags")
@@ -88,20 +95,20 @@ def store_fighter_data(textfile):
         if rank != '':
             fname['rank'] = rank
         else:
-                if len(fighter_data) <= 11:
-                    fname['rank'] = 'C'
-                else:
-                    # Convert the last rank to an integer, increment it, and convert it back to a string
-                    last_rank = int(fighter_data[-1]['rank'])
-                    if last_rank == 15:
-                            fname['rank'] = '1'
-                    else:    
-                            fname['rank'] = str(last_rank + 1)
+            if len(fighter_data) <= 11:
+                fname['rank'] = 'C'
+            else:
+                # Convert the last rank to an integer, increment it, and convert it back to a string
+                last_rank = int(fighter_data[-1]['rank'])
+                if last_rank == 15:
+                    fname['rank'] = '1'
+                else:    
+                    fname['rank'] = str(last_rank + 1)
 
-        #Scrape debut
+        # Scrape debut
         scrape_debut = soup.find_all("div", class_="c-bio__field")
         for elem in scrape_debut:
-            if elem.text.find('Octagon') == True:
+            if elem.text.find('Octagon') != -1:
                 debut = elem.text
                 break
             else:
@@ -111,9 +118,11 @@ def store_fighter_data(textfile):
         
         fighter_data.append(fname)
 
+# Function to write fighter data to CSV
 def write_to_csv(fighter_list):
     with open(csv_file, mode='w', newline='') as file:
-        writer = csv.DictWriter(file, fieldnames=['fname', 'lname', 'nickname', 'division', 'rank', 'style', 'country', 'debut'])
+        # Add 'id' to the list of fieldnames
+        writer = csv.DictWriter(file, fieldnames=['id', 'fname', 'lname', 'nickname', 'division', 'rank', 'style', 'country', 'debut'])
         writer.writeheader()
         for fighter in fighter_list:
             writer.writerow(fighter)

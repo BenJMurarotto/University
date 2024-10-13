@@ -1,13 +1,9 @@
 const express = require('express');
-const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
 const app = express();
 const port = 3000;
 const path = require('path');
-
-
-// Enable CORS for cross-origin requests
-app.use(cors());
+let tableCounter = 0; // Variable to count number of unique values in the table.
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -19,11 +15,28 @@ const db = new sqlite3.Database('./back/app/misc/ufcdle.db', (err) => {
   }
   console.log('Connected to the SQLite database.');
 });
-
-// API route to fetch data from the SQLite database
-app.get('/data', (req, res) => {
-  const sql = 'SELECT * FROM fighters'; // Replace with your table name
+// Choose a random fighter for game logic
+function tableCount() {
+  const sql = 'COUNT * from fighters';
   db.all(sql, [], (err, rows) => {
+    if (err) {
+      console.error('Error fetching', err.message);
+      return;
+    tableCounter = rows.length;
+    console.log(`Row count equals ${tableCounter}`);
+
+    }
+
+  })
+}
+
+
+
+// API route for dynamic AJAX search.
+app.get('/api/data', (req, res) => {
+  const searchQuery = req.query.name ? `${req.query.name}%` : '%';
+  const sql = 'SELECT * FROM fighters WHERE fname LIKE ?';
+  db.all(sql, [searchQuery], (err, rows) => {
     if (err) {
       console.error('Error fetching data:', err.message);
       res.status(500).json({ error: 'Failed to fetch data' });
@@ -32,7 +45,6 @@ app.get('/data', (req, res) => {
     res.json(rows);
   });
 });
-
 // Start the server
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
