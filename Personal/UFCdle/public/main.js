@@ -1,8 +1,17 @@
 import { format } from 'date-fns';
 let debounceTimeout;
-let selectedFighters = []; // Declare globally to keep track of selected fighter IDs
+let selectedFighters = [];
 let fighterDivisions = [`Women's Strawweight`, `Women's Flyweight`, `Women's Bantamweight`, `Flyweight`, `Bantamweight`, `Featherweight`, `Lightweight`, `Welterweight`, `Middleweight`, `Light Heavyweight`, `Heavyweight`];
 let continentToCountries = {};
+
+document.addEventListener('DOMContentLoaded', () => {
+    fetch('/api/countries')
+        .then(response => response.json())
+        .then(data => {
+            continentToCountries = data;
+            console.log('Continent to countries mapping loaded:', continentToCountries);
+        });
+});
 
 document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('search-input');
@@ -13,15 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
             searchFighter();
         }, 150);
     });
-document.addEventListener('DOMContentLoaded', () => {
-    fetch('/api/countries')
-        .then(response => response.json())
-        .then(data => {
-            continentToCountries = data; // Store the mapping in memory
-            console.log('Continent to countries mapping loaded:', continentToCountries);
-        });
-});
-console.log(continentToCountries);
 
     // Fetch the secret fighter on page load
     getSecretFighter();

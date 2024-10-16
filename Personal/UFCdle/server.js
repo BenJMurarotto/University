@@ -6,7 +6,7 @@ const path = require('path');
 const Papa = require('papaparse');
 const fs = require('fs');
 const csvFile = fs.readFileSync('./public/countriesbycontinent.csv', 'utf-8');
-const countriesToContinent = {}
+let countriesToContinent = {}
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -21,12 +21,14 @@ const db = new sqlite3.Database('./back/app/misc/ufcdle.db', (err) => {
 
 function parseCountryCSV() {
   Papa.parse(csvFile, {
-    header: 'true',
+    header: true,
+    skipEmptyLines: true,
     complete: function(results) {
-        const countriesToContinent = createMapping(results.data);
-        console.log(countriesToContinent);
+        continentToCountries = createMapping(results.data);
+        console.log('continentToCountries on server:', continentToCountries); // Check this log
     }
-  });
+});
+
 }
 parseCountryCSV();
 
@@ -43,8 +45,10 @@ function createMapping(data) {
 }
 
 app.get('/api/countries', (req, res) => {
-  res.json(countriesToContinent);
+  console.log('Sending continentToCountries:', continentToCountries); // Log to see what's being sent
+  res.json(continentToCountries);
 });
+
 
 
 // API route for dynamic AJAX search
