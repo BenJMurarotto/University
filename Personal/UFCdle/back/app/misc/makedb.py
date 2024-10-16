@@ -25,9 +25,9 @@ with open('fighter_data.csv', 'r') as file:
     for row in reader:
         cur.execute( 
         '''
-        INSERT INTO fighters (fname, lname, nickname, division, rank, style, country, debut)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]))
+        INSERT INTO fighters (id, fname, lname, nickname, division, rank, style, country, debut)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8]))
 
 con.commit()
 cur.close()

@@ -4,14 +4,14 @@
     place-items: center;
     grid-template-columns: 1fr;
     gap: 10px;
-    height: 100vh;
+    height: 10vh;
     margin: 0;
 }
 
 /* Grid item containing heading and search input */
 .grid-item {
     background-color: lightblue;
-    padding: 20px;
+    padding: 10px;
     border: 1px solid #ccc;
     text-align: center;
     position: relative; /* Make it relative to position the dropdown correctly */
