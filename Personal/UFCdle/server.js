@@ -6,21 +6,9 @@ const path = require('path');
 const Papa = require('papaparse');
 const fs = require('fs');
 const csvFile = fs.readFileSync('./public/countriesbycontinent.csv', 'utf-8');
+const countriesToContinent = {}
 
 app.use(express.static(path.join(__dirname, 'public')));
-
-Papa.parse(csvFile, {
-    header: 'true',
-    complete: function(results) {
-        const countriesToContinent = createMapping(results.data);
-        console.log(countriesToContinent);
-    }
-});
-
-function createMapping(data) {
-    const countriesToContinent = {}
-
-}
 
 // Connect to SQLite database
 const db = new sqlite3.Database('./back/app/misc/ufcdle.db', (err) => {
@@ -29,6 +17,33 @@ const db = new sqlite3.Database('./back/app/misc/ufcdle.db', (err) => {
     return;
   }
   console.log('Connected to the SQLite database.');
+});
+
+function parseCountryCSV() {
+  Papa.parse(csvFile, {
+    header: 'true',
+    complete: function(results) {
+        const countriesToContinent = createMapping(results.data);
+        console.log(countriesToContinent);
+    }
+  });
+}
+parseCountryCSV();
+
+function createMapping(data) {
+  const mapping = {};
+  data.forEach(row => {
+    const { Country, Continent } = row;
+    if (!mapping[Continent]) {
+      mapping[Continent] = [];
+    }
+    mapping[Continent].push(Country);
+  });
+  return mapping;
+}
+
+app.get('/api/countries', (req, res) => {
+  res.json(countriesToContinent);
 });
 
 

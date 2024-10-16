@@ -2,6 +2,7 @@ import { format } from 'date-fns';
 let debounceTimeout;
 let selectedFighters = []; // Declare globally to keep track of selected fighter IDs
 let fighterDivisions = [`Women's Strawweight`, `Women's Flyweight`, `Women's Bantamweight`, `Flyweight`, `Bantamweight`, `Featherweight`, `Lightweight`, `Welterweight`, `Middleweight`, `Light Heavyweight`, `Heavyweight`];
+let continentToCountries = {};
 
 document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('search-input');
@@ -12,6 +13,15 @@ document.addEventListener('DOMContentLoaded', () => {
             searchFighter();
         }, 150);
     });
+document.addEventListener('DOMContentLoaded', () => {
+    fetch('/api/countries')
+        .then(response => response.json())
+        .then(data => {
+            continentToCountries = data; // Store the mapping in memory
+            console.log('Continent to countries mapping loaded:', continentToCountries);
+        });
+});
+console.log(continentToCountries);
 
     // Fetch the secret fighter on page load
     getSecretFighter();
@@ -103,9 +113,9 @@ function appendSelectedFighter(fighter) {
         // 3. Rank Cell (comparison logic)
         const rankCell = document.createElement('td');
         if (fighter.rank < secretFighter.rank) {
-            rankCell.textContent = fighter.rank + ' ▲';
-        } else if (fighter.rank > secretFighter.rank) {
             rankCell.textContent = fighter.rank + ' ▼';
+        } else if (fighter.rank > secretFighter.rank) {
+            rankCell.textContent = fighter.rank + ' ▲';
         } else {
             rankCell.textContent = fighter.rank;
             rankCell.style.color = 'green';
@@ -123,9 +133,15 @@ function appendSelectedFighter(fighter) {
         // 5. Country Cell
         const countryCell = document.createElement('td');
         countryCell.textContent = fighter.country;
+
         if (fighter.country === secretFighter.country) {
             countryCell.style.color = 'green';
         }
+            else if (continentToCountries[fighter.country] == continentToCountries[secretFighter.country]) {
+                countryCell.style.color = 'orange';
+                console.log(continentToCountries[secretFighter.country])
+                console.log(continentToCountries[fighter.country])
+            }
         row.appendChild(countryCell);
 
         // 6. Debut Cell
@@ -140,7 +156,7 @@ function appendSelectedFighter(fighter) {
             const formattedDebutDate = format(fighterDebutDate, 'MMM yyyy');
             
             // Compare the debut dates
-            const debutAddon = fighterDebutDate < secretFighterDebutDate ? ' ▲' : ' ▼';
+            var debutAddon = fighterDebutDate < secretFighterDebutDate ? ' ▲' : ' ▼';
             
             // Create the table cell for debut
             const debutCell = document.createElement('td');
@@ -148,6 +164,7 @@ function appendSelectedFighter(fighter) {
             
             // If the debut dates are the same, highlight the cell in green
             if (fighterDebutDate.getTime() === secretFighterDebutDate.getTime()) {
+                debutAddon = ''
                 debutCell.style.color = 'green';
             }
             
